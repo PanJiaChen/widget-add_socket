@@ -1,0 +1,95 @@
+<html>
+<!--@(window)-->
+<!--@(document)-->
+
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <title>add-socket</title>
+    <style type="text/css">
+    .hide {
+        display: none;
+    }
+    
+    textarea {
+        width: 500px;
+        height: 150px;
+    }
+    
+    .sockets-box-container {
+        position: absolute;
+        z-index: 11001;
+        background-color: #FFF;
+        position: absolute;
+        display: none;
+        background: none repeat scroll 0% 0% #FFF;
+        color: #333;
+        border: 1px solid #CCC;
+        border-radius: 2px;
+        padding: 12px;
+        box-shadow: 0px 2px 8px 1px rgba(0, 0, 0, 0.2);
+    }
+    .sockets-box-title{
+        font-size: 14px;
+    }
+    .widget-to-location {
+        position: absolute;
+        opacity: 0;
+        z-index: -1000;
+    }
+    .sockets-box-item{
+
+    }
+    
+    #pop {
+        width: 50px;
+        height: 20px;
+        background-color: blue;
+        position: absolute;
+    }
+    </style>
+</head>
+
+<body>
+    <div id="mainContainer">
+        <div id="formResult">
+            <div>
+                <textarea widget-add-sockets></textarea>
+                <a href="javascript:void(0)" class="add-sockets">增加股票</a>
+                <div class=''></div>
+            </div>
+            <div>
+                <textarea widget-add-sockets></textarea>
+                <a href="javascript:void(0)" class="add-sockets">增加股票</a>
+            </div>
+            <div>
+                <textarea widget-add-sockets></textarea>
+                <a href="javascript:void(0)" class="add-sockets">增加股票</a>
+            </div>
+        </div>
+    </div>
+    <div id="pop"></div>
+    <script type="text/javascript" src="jquery-1.11.1.min.js"></script>
+    <script type="text/javascript" src="hsData.js"></script>
+    <script type="text/javascript" src="add-sockets.js"></script>
+    <script>
+
+
+    </script>
+    <script>
+    (function() {
+        // 实例化对象
+        var socketsBox = new SocketsBox({
+
+        });
+
+        // bind event
+        $('.add-sockets').click(function() {
+
+            socketsBox.show();
+        });
+
+    })();
+    </script>
+</body>
+
+</html>
