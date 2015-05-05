@@ -13,10 +13,10 @@
             '<div class="sockets-box-title">请输入您要添加的股票代码</div>' +
             '<ul class="sockets-box-list"></ul>' +
             '</div>' +
-            '<div class="widget-to-location">'+
-            '<span data-before></span>'+
-            '<span data-flag></span>'+
-            '<span data-after></span>'+
+            '<div class="widget-to-location">' +
+            '<span data-before></span>' +
+            '<span data-flag>$</span>' +
+            '<span data-after></span>' +
             '</div>'
         );
 
@@ -32,18 +32,19 @@
             var tPos = $slef.offset();
             var move2Top = tPos.top + tHeight;
             var move2Left = tPos.left;
-            var tVal = val.replace(/$/, '<span data-flag>$</span>');
-            tVal = tVal.replace(/\n/g, "<br/>");
             var widget2Location = $('.widget-to-location');
-            widget2Location.html(tVal)
-                .css({
-                    'width': tWidth,
-                    'height': tHeight,
-                    'top': move2Top,
-                    'left': move2Left
-                });
+            // var tVal = val.replace(/$/, '<span data-flag>$</span>');
+            tVal = val.replace(/\n/g, "<br/>");
+            splitVal(tVal, widget2Location);
 
-            var lastSpan = widget2Location.find('span:last');
+            widget2Location.css({
+                'width': tWidth,
+                'height': tHeight,
+                'top': move2Top,
+                'left': move2Left
+            });
+
+            var lastSpan = widget2Location.find('span[data-flag]');
             var lastSpanPos = lastSpan.offset();
             console.log(lastSpanPos.left, lastSpanPos.top)
             $('.sockets-box-container').css({
@@ -52,24 +53,33 @@
             });
         }
 
-        // var initSearch = function() {
-        //     var socketVal = val.split('$');
-        //     socketVal = socketVal[socketVal.length - 1];
-        //     console.log(socketVal)
-        //     $parent.on('input propertychange', '[widget-add-sockets]', function(event){
+        var stocksSearch = function(searchVal) {
+            var wizard = new HsDataFactoryList['wizard']({
+                prod_code: searchVal,
+                en_finance_mic: 'SS,SZ'
+            });
+            wizard.onDataReady(function(data) {
+                 updateSearch(data)
 
-        //     });
-        //     var wizard = new HsDataFactoryList['wizard']({
-        //         prod_code: socketVal,
-        //         en_finance_mic: 'SS,SZ'
-        //     });
-        //     wizard.onDataReady(function(data) {
-        //         console.log(wizard.data[0].prod_code)
-        //     }).init()
-        // }
+            }).init()
+        }
 
-        var changeFlag=function(){
+        var updateSearch=function(data){
+            for (var i = 0; i < data.length; i++) {
+                $('.sockets-box-list').append('<li class="sockets-box-item">' + data[i]['prod_code'] +data[i]['prod_name']+ '</li>');
+            }
 
+        }
+        var splitVal = function(val, target) {
+            var valArr = val.split('$');
+            var strBefore = valArr.slice(0, valArr.length - 1).join('$');
+            var strAfter = valArr.slice(-1);
+            if(strBefore.length>0){
+                target.find('span[data-before]').text(strBefore)
+            } else{
+                target.find('span[data-before]').text(' ')
+            };
+            target.find('span[data-after]').text(strAfter);
         }
 
         var init = function(instance) {
@@ -77,16 +87,20 @@
             var $parent = $(instance.opts.appendTo);
 
             $parent.append($socketsBoxCopy.clone());
-
+            var widget2Location = $('.widget-to-location');
             $parent.on('input propertychange', '[widget-add-sockets]', function(event) {
                 var val = $(this).val();
                 var lastVal = val.substr(-1);
                 var $self = $(this);
                 if (lastVal === '$') {
-                    
                     fixPosition($self, val);
                     $('.sockets-box-container').show();
-                    
+                }
+                var spanBeforLength = widget2Location.find('span[data-before]').text().length;
+                if (spanBeforLength > 0) {
+                    splitVal(val, widget2Location)
+                    var spanAfterVal = widget2Location.find('span[data-after]').text()
+                    stocksSearch(spanAfterVal)
                 }
 
             });
