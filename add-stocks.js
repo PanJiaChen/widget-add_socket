@@ -6,12 +6,12 @@
     var KEY_PRESS_INTERVAL = 300; // 按键间隔（毫秒）用来触发搜索
 
 
-    var SocketsBox = (function() {
+    var StocksBox = (function() {
 
-        var $socketsBoxCopy = $(
-            '<div class="sockets-box-container">' +
-            '<div class="sockets-box-title">请输入您要添加的股票代码</div>' +
-            '<ul class="sockets-box-list"></ul>' +
+        var $stocksBoxCopy = $(
+            '<div class="stocks-box-container">' +
+            '<div class="stocks-box-title">请输入您要添加的股票代码</div>' +
+            '<ul class="stocks-box-list"></ul>' +
             '</div>' +
             '<div class="widget-to-location">' +
             '<span data-before></span>' +
@@ -47,7 +47,7 @@
             var lastSpan = widget2Location.find('span[data-flag]');
             var lastSpanPos = lastSpan.offset();
             console.log(lastSpanPos.left, lastSpanPos.top)
-            $('.sockets-box-container').css({
+            $('.stocks-box-container').css({
                 left: (lastSpanPos.left) + 'px',
                 top: (lastSpanPos.top - tHeight + 15) + 'px'
             });
@@ -59,14 +59,14 @@
                 en_finance_mic: 'SS,SZ'
             });
             wizard.onDataReady(function(data) {
-                 updateSearch(data)
+                updateSearch(data)
 
             }).init()
         }
 
-        var updateSearch=function(data){
+        var updateSearch = function(data) {
             for (var i = 0; i < data.length; i++) {
-                $('.sockets-box-list').append('<li class="sockets-box-item">' + data[i]['prod_code'] +data[i]['prod_name']+ '</li>');
+                $('.stocks-box-list').append('<li class="stocks-box-item">' + data[i]['prod_name'] + data[i]['prod_code'] + '</li>');
             }
 
         }
@@ -74,27 +74,31 @@
             var valArr = val.split('$');
             var strBefore = valArr.slice(0, valArr.length - 1).join('$');
             var strAfter = valArr.slice(-1);
-            if(strBefore.length>0){
+            if (strBefore.length > 0) {
                 target.find('span[data-before]').text(strBefore)
-            } else{
+            } else {
                 target.find('span[data-before]').text(' ')
             };
             target.find('span[data-after]').text(strAfter);
         }
 
+        $(document).on('click', '.stocks-box-item', function() {
+            console.log($(this).text());
+        })
+
         var init = function(instance) {
             // 生成元素
             var $parent = $(instance.opts.appendTo);
 
-            $parent.append($socketsBoxCopy.clone());
+            $parent.append($stocksBoxCopy.clone());
             var widget2Location = $('.widget-to-location');
-            $parent.on('input propertychange', '[widget-add-sockets]', function(event) {
+            $parent.on('input propertychange', '[widget-add-stocks]', function(event) {
                 var val = $(this).val();
                 var lastVal = val.substr(-1);
                 var $self = $(this);
                 if (lastVal === '$') {
                     fixPosition($self, val);
-                    $('.sockets-box-container').show();
+                    $('.stocks-box-container').show();
                 }
                 var spanBeforLength = widget2Location.find('span[data-before]').text().length;
                 if (spanBeforLength > 0) {
@@ -134,7 +138,7 @@
     // *********
     // 对外API
     // *********
-    SocketsBox.prototype = {
+    StocksBox.prototype = {
         unbind: function(type) {
             this.handlers[type] = [];
             return this;
@@ -157,20 +161,20 @@
         init: function() {
             // popup时初始化隐藏
             if (this.opts.popup) {
-                $(this.opts.appendTo).find('.sockets-box-container').addClass('school-box-hide');
+                $(this.opts.appendTo).find('.stocks-box-container').addClass('school-box-hide');
             }
         },
         show: function() {
-            $(this.opts.appendTo).find('.sockets-box-container')
+            $(this.opts.appendTo).find('.stocks-box-container')
                 .removeClass('hide')
         },
         hide: function() {
-            $(this.opts.appendTo).find('.sockets-box-container')
+            $(this.opts.appendTo).find('.stocks-box-container')
                 .addClass('hide');
         }
     };
 
     // export
-    window.SocketsBox = SocketsBox;
+    window.StocksBox = StocksBox;
 
 })(jQuery);

@@ -15,7 +15,7 @@
         height: 150px;
     }
     
-    .sockets-box-container {
+    .stocks-box-container {
         position: absolute;
         z-index: 11001;
         background-color: #FFF;
@@ -27,17 +27,34 @@
         border-radius: 2px;
         padding: 12px;
         box-shadow: 0px 2px 8px 1px rgba(0, 0, 0, 0.2);
+        overflow-x: hidden;
+        overflow-y: scroll;
+        max-height: 300px;
     }
-    .sockets-box-title{
+    
+    .stocks-box-title {
         font-size: 14px;
     }
+    
     .widget-to-location {
         position: absolute;
         opacity: 0;
         z-index: -1000;
     }
-    .sockets-box-item{
-
+    
+    .stocks-box-item {
+        list-style: none;
+        cursor: pointer;
+        min-width: 50px;
+        padding: 7px 13px
+    }
+    .stocks-box-list{
+        padding: 0px;
+    }
+    .stocks-box-item:hover {
+        background-color: #F2F2F5;
+        text-decoration: none;
+        color: #EB7350;
     }
     
     #pop {
@@ -53,39 +70,37 @@
     <div id="mainContainer">
         <div id="formResult">
             <div>
-                <textarea widget-add-sockets></textarea>
-                <a href="javascript:void(0)" class="add-sockets">增加股票</a>
+                <textarea widget-add-stocks></textarea>
+                <a href="javascript:void(0)" class="add-stocks">增加股票</a>
                 <div class=''></div>
             </div>
             <div>
-                <textarea widget-add-sockets></textarea>
-                <a href="javascript:void(0)" class="add-sockets">增加股票</a>
+                <textarea widget-add-stocks></textarea>
+                <a href="javascript:void(0)" class="add-stocks">增加股票</a>
             </div>
             <div>
-                <textarea widget-add-sockets></textarea>
-                <a href="javascript:void(0)" class="add-sockets">增加股票</a>
+                <textarea widget-add-stocks></textarea>
+                <a href="javascript:void(0)" class="add-stocks">增加股票</a>
             </div>
         </div>
     </div>
     <div id="pop"></div>
     <script type="text/javascript" src="jquery-1.11.1.min.js"></script>
     <script type="text/javascript" src="hsData.js"></script>
-    <script type="text/javascript" src="add-sockets.js"></script>
+    <script type="text/javascript" src="add-stocks.js"></script>
     <script>
-
-
     </script>
     <script>
     (function() {
         // 实例化对象
-        var socketsBox = new SocketsBox({
+        var stocksBox = new StocksBox({
 
         });
 
         // bind event
-        $('.add-sockets').click(function() {
+        $('.add-stocks').click(function() {
 
-            socketsBox.show();
+            stocksBox.show();
         });
 
     })();
