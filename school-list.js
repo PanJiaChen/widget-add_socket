@@ -8743,18 +8743,18 @@ var SCHOOL_LIST = [{
     // 对外API
     // *********
     SchoolBox.prototype = {
-        unbind: function(type) {
-            this.handlers[type] = [];
-            return this;
-        },
         on: function(type, handler) {
             if (typeof this.handlers[type] === 'undefined') {
                 this.handlers[type] = [];
             }
             this.handlers[type].push(handler);
-            return this;
         },
         fire: function(type, data) {
+            // 加入sourceId给回调参数
+            if (this.curSourceId) {
+                data['sourceId'] = this.curSourceId;
+            }
+
             if (this.handlers[type] instanceof Array) {
                 var handlers = this.handlers[type];
                 for (var i = 0, len = handlers.length; i < len; i++) {
@@ -8769,7 +8769,12 @@ var SCHOOL_LIST = [{
                 $(this.opts.appendTo).find('.school-box-wrapper').addClass('school-box-hide');
             }
         },
-        show: function() {
+        show: function(sourceId) {
+            // 记录当前打开SchoolBox的触发元素
+            if (sourceId) {
+                this.curSourceId = sourceId;
+            }
+
             if (this.opts.popup) {
                 $('body').append('<div class="school-box-mask"></div>');
                 $(this.opts.appendTo).find('.school-box-wrapper')
@@ -8779,6 +8784,11 @@ var SCHOOL_LIST = [{
             }
         },
         hide: function() {
+            // 清空sourceId触发元素
+            if (this.curSourceId) {
+                this.curSourceId = null;
+            }
+
             if (this.opts.popup) {
                 $('.school-box-mask').remove();
                 $(this.opts.appendTo).find('.school-box-wrapper')

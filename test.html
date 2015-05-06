@@ -229,27 +229,43 @@
 <script type="text/javascript" src="jquery-1.11.1.min.js"></script>
 <script type="text/javascript" src="school-list.js"></script>
 <script>
+    
     (function(){
         // 实例化对象
         var schoolBox = new SchoolBox({
             searchSchool: true
         });
 
+        // 监听自定义事件
+        schoolBox.on('schoolChosen', function(data){
+            if(data.sourceId){
+                var $source = $('#' + data.sourceId);
+                $source.siblings('.school-input').val(data.schoolName);
+                $source.siblings('.school-id').val(data.schoolId);
+            }
+        });
+
         // bind event
-        $('.choose-school').click(function(){
-            var $schoolInput = $(this).siblings('.school-input');
-            var $schoolId = $(this).siblings('.school-id');
-
-            // 监听自定义事件
-            schoolBox.unbind('schoolChosen').on('schoolChosen', function(data){
-                $schoolInput.val(data.schoolName);
-                $schoolId.val(data.schoolId);
-            });
-
-            schoolBox.show();
+        $('.choose-school').click(function(event){
+            schoolBox.show($(this).attr('id'));
         });
 
     })();
-    
+//     var wizard = new HsWizard({prod_code: '00570', en_finance_mic: 'SS,SZ'});
+//                 wizard.onDataReady(function (data) {
+// //                    var data= obj.data;
+//                     assert(data.length > 10, 'code包含000的沪市股票，至少有10个')
+//                     for (var i in data) {
+//                         var code = data[i].prod_code;
+//                         if (code.indexOf('000') == -1) {
+//                             assert(false, code + '不包含000')
+//                             return;
+//                         }
+//                         if (code.indexOf('SS') == -1) {
+//                             assert(false, code + '不包含SS')
+//                         }
+//                     }
+//                     assert(true, '请求的数据无明显异常')
+//                 }).init()
 </script>
 </html>

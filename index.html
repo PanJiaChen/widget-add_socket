@@ -48,20 +48,21 @@
         min-width: 50px;
         padding: 7px 13px
     }
-    .stocks-box-list{
+    
+    .stocks-box-list {
         padding: 0px;
     }
+    
     .stocks-box-item:hover {
         background-color: #F2F2F5;
         text-decoration: none;
         color: #EB7350;
     }
     
-    #pop {
-        width: 50px;
-        height: 20px;
-        background-color: blue;
-        position: absolute;
+    .stocks-box-item.active {
+        background-color: #F2F2F5;
+        text-decoration: none;
+        color: #EB7350;
     }
     </style>
 </head>
@@ -84,7 +85,6 @@
             </div>
         </div>
     </div>
-    <div id="pop"></div>
     <script type="text/javascript" src="jquery-1.11.1.min.js"></script>
     <script type="text/javascript" src="hsData.js"></script>
     <script type="text/javascript" src="add-stocks.js"></script>
