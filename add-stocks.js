@@ -1,9 +1,10 @@
 (function($) {
-    // Constants
+    // keycode
     var KEY_ENTER = 13;
     var KEY_UP = 38;
     var KEY_DOWN = 40;
-    var KEY_PRESS_INTERVAL = 300; // 按键间隔（毫秒）用来触发搜索
+    var KEY_SPACE = 32;
+    // var KEY_PRESS_INTERVAL = 300; // 按键间隔（毫秒）用来触发搜索
 
     var preventDefault = function(event) {
         if (event && event.preventDefault)
@@ -27,12 +28,6 @@
             '</div>'
         );
 
-
-        var $popupCloseCopy = $('<div class="school-box-popup-close"><a href="javascript:void(0)" title="关闭">X</a></div>');
-
-        var $provinceCopy = $('<a href="javascript:void(0)" class="province-item"></a>');
-        var $schoolCopy = $('<a href="javascript:void(0)" class="school-item"></a>');
-
         var fixPosition = function($slef, val) {
             var tWidth = $slef.outerWidth();
             var tHeight = $slef.outerHeight();
@@ -40,7 +35,7 @@
             var move2Top = tPos.top + tHeight;
             var move2Left = tPos.left;
             var widget2Location = $('.widget-to-location');
-            // var tVal = val.replace(/$/, '<span data-flag>$</span>');
+        
             tVal = val.replace(/\n/g, "<br/>");
             splitVal(tVal, widget2Location);
 
@@ -53,7 +48,7 @@
 
             var lastSpan = widget2Location.find('span[data-flag]');
             var lastSpanPos = lastSpan.offset();
-            console.log(lastSpanPos.left, lastSpanPos.top)
+            
             $('.stocks-box-container').css({
                 left: (lastSpanPos.left) + 'px',
                 top: (lastSpanPos.top - tHeight + 15) + 'px'
@@ -66,13 +61,13 @@
                 en_finance_mic: 'SS,SZ'
             });
             wizard.onDataReady(function(data) {
+
                 updateSearch(data)
 
             }).init()
         }
 
         var updateSearch = function(data) {
-            $('.stocks-box-list').empty();
             for (var i = 0; i < data.length; i++) {
                 var codeGroup = data[i]['prod_code'].split('.');
                 if (codeGroup[1] == 'SS') {
@@ -83,25 +78,13 @@
         }
 
         $(document).on('click', '.stocks-box-item', function(event) {
-
             var val = $('.widget-focus').val();
             var originalVal = $('.widget-to-location').find('[data-before]').html();
             var addVal = $(this).text();
             $('.widget-focus').val(originalVal + '$' + addVal + '$').focus();
             $('.stocks-box-container').hide();
+            $('.widget-to-location').find('[data-flag]').attr('data-flag', 'false');
         })
-
-        $('.widget-focus').on('keyup', function(event) {
-
-
-            // // when正常输入
-            // initSearchSchool.currentTime = (new Date()).getTime();
-            // // NOTE: 持续快速输入时不触发搜索
-            // if (initSearchSchool.currentTime - initSearchSchool.lastKeypressTime > KEY_PRESS_INTERVAL) {
-            //     initSearchSchool.lastKeypressTime = initSearchSchool.currentTime;
-            //     searchSchool(keywords, $searchListContainer, $searchList, $searchEmpty);
-            // }
-        });
 
         var searchListScroll = function(isDown, $searchListContainer, $searchList) {
             var scrollTop = $searchListContainer.scrollTop();
@@ -159,12 +142,8 @@
             var valArr = val.split('$');
             var strBefore = valArr.slice(0, valArr.length - 1).join('$');
             var strAfter = valArr.slice(-1);
-            if (strBefore.length > 0) {
-                target.find('span[data-before]').text(strBefore)
-            } else {
-                target.find('span[data-before]').text(' ')
-            };
-            target.find('span[data-after]').text(strAfter);
+            target.find('span[data-before]').html(strBefore)
+            target.find('span[data-after]').html(strAfter);
         }
 
 
@@ -176,62 +155,65 @@
             var widget2Location = $('.widget-to-location');
             var $searchListContainer = $parent.find('.stocks-box-container');
             var $searchList = $parent.find('.stocks-box-list');
-
+            var $spanFlag = widget2Location.find('span[data-flag]');
             $parent.on('keyup', '[widget-add-stocks]', function(event) {
                 $('[widget-add-stocks]').removeClass('widget-focus');
                 $(this).addClass('widget-focus');
 
                 // 特殊按键（动作键）
-                if (event.keyCode == KEY_ENTER) {
-                    searchSchoolChosen($searchList);
-                    return preventDefault(event);
-                    return false;
+                switch (event.keyCode) {
+                    case KEY_ENTER:
+                        searchSchoolChosen($searchList);
+                        return preventDefault(event);
+                        break;
+                    case KEY_UP:
+                        searchListScrollPrev($searchListContainer, $searchList);
+                        return preventDefault(event);
+                        break;
+                    case KEY_DOWN:
+                        searchListScrollNext($searchListContainer, $searchList);
+                        return preventDefault(event);
+                        break;
+                    case KEY_SPACE:
+                        $searchListContainer.hide();
+                        $spanFlag.attr('data-flag', 'false');
+                        $searchList.empty();
+                        break;
+                    default:
+                        break;
                 }
-                if (event.keyCode == KEY_UP) {
-                    searchListScrollPrev($searchListContainer, $searchList);
-                    return preventDefault(event);
-                    return false;
-                }
-                if (event.keyCode == KEY_DOWN) {
-                    searchListScrollNext($searchListContainer, $searchList);
-                    return preventDefault(event);
-                    return false;
-                }
-
-
                 var val = $(this).val();
                 var lastVal = val.substr(-1);
                 var $self = $(this);
                 if (lastVal === '$') {
                     fixPosition($self, val);
-                    $('.stocks-box-container').show();
-                    splitVal(val, widget2Location)
-                }
-
-                var spanBeforLength = widget2Location.find('span[data-before]').text().length;
-                var spanAfterLength = widget2Location.find('span[data-after]').text().length;
-
-                if (spanBeforLength > 0 || spanAfterLength > 0) {
+                    $searchListContainer.show();
+                    $searchList.empty();
                     splitVal(val, widget2Location);
-                    console.log(spanAfterVal)
-                    var spanAfterVal = widget2Location.find('span[data-after]').text()
-                    stocksSearch(spanAfterVal)
+                    $spanFlag.attr('data-flag', 'true');
                 }
 
 
-                // var keywords = $.trim($(this).val());
-                // // 空格or拼音没输完时暂不search
-                // if (keywords.length == 0 || keywords.indexOf("'") > -1) {
-                //     $searchListContainer.hide();
-                //     return false;
-                // }
-            });
+                if ($spanFlag.attr('data-flag') == 'true') {
+                    splitVal(val, widget2Location);
+                    var spanAfterVal = widget2Location.find('span[data-after]').text();
+                    spanAfterVal.length >= 2 && stocksSearch(spanAfterVal);
 
+                    // // when正常输入
+                    // initSearchSchool.currentTime = (new Date()).getTime();
+                    // // NOTE: 持续快速输入时不触发搜索
+                    // if (initSearchSchool.currentTime - initSearchSchool.lastKeypressTime > KEY_PRESS_INTERVAL) {
+                    //     initSearchSchool.lastKeypressTime = initSearchSchool.currentTime;
+                    //     searchSchool(keywords, $searchListContainer, $searchList, $searchEmpty);
+                    // }
+                }
+
+            });
 
         };
 
         // ***************
-        // 真正的构造函数
+        // 
         // ***************
         return function(options) {
             // 默认配置
