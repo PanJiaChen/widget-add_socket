@@ -68,6 +68,7 @@
         }
 
         var updateSearch = function(data) {
+            $('.stocks-box-list').empty();
             for (var i = 0; i < data.length; i++) {
                 var codeGroup = data[i]['prod_code'].split('.');
                 if (codeGroup[1] == 'SS') {
@@ -90,7 +91,7 @@
             if (deltaOffset > viewMax) {
                 $searchListContainer.scrollTop(scrollTop + deltaOffset - viewMax)
             } else if (deltaOffset < viewMin) {
-                $searchListContainer.scrollTop(scrollTop - (viewMin - deltaOffset)-30)
+                $searchListContainer.scrollTop(scrollTop - (viewMin - deltaOffset) - 30)
             }
         };
 
@@ -151,8 +152,8 @@
                 var val = $('.widget-focus').val();
                 var originalVal = widget2Location.find('[data-before]').html();
                 var addVal = $(this).text();
-                $('.widget-focus').val(originalVal + '$' + addVal + '$').focus();
-                $searchListContainer .hide();
+                $('.widget-focus').val(originalVal + '$' + addVal + '$ ').focus();
+                $searchListContainer.hide();
                 $spanFlag.attr('data-flag', 'false');
             })
 
@@ -165,39 +166,12 @@
                 }
             })
 
-            $parent.on('keyup', '[widget-add-stocks]',function(){
-                console.log(timeClock)
-                clearInterval(timeClock);
-            });
 
             //按键事件
-            $parent.on('keydown', '[widget-add-stocks]', function(event) {
+            $parent.on('keyup', '[widget-add-stocks]', function(event) {
                 //通过widget-focus类判断对象 
                 $('[widget-add-stocks]').removeClass('widget-focus');
                 $(this).addClass('widget-focus');
-
-                // 特殊按键（动作键）
-                switch (event.keyCode) {
-                    case KEY_ENTER:
-                        searchSchoolChosen($searchList);
-                        return preventDefault(event);
-                        break;
-                    case KEY_UP:
-                        searchListScrollPrev($searchListContainer, $searchList);
-                        return preventDefault(event);
-                        break;
-                    case KEY_DOWN:
-                        searchListScrollNext($searchListContainer, $searchList);
-                        return preventDefault(event);
-                        break;
-                    case KEY_SPACE:
-                        $searchListContainer.hide();
-                        $spanFlag.attr('data-flag', 'false');
-                        $searchList.empty();
-                        break;
-                    default:
-                        break;
-                }
 
                 var val = $(this).val();
                 var lastVal = val.substr(-1);
@@ -210,13 +184,35 @@
                     $spanFlag.attr('data-flag', 'true');
                 }
 
-
                 if ($spanFlag.attr('data-flag') == 'true') {
+                    // 特殊按键（动作键）
+                    switch (event.keyCode) {
+                        case KEY_ENTER:
+                            searchSchoolChosen($searchList);
+                            return preventDefault(event);
+                            break;
+                        case KEY_UP:
+                            searchListScrollPrev($searchListContainer, $searchList);
+                            return preventDefault(event);
+                            break;
+                        case KEY_DOWN:
+                            searchListScrollNext($searchListContainer, $searchList);
+                            return preventDefault(event);
+                            break;
+                        case KEY_SPACE:
+                            $searchListContainer.hide();
+                            $spanFlag.attr('data-flag', 'false');
+                            $searchList.empty();
+                            break;
+                        default:
+                            break;
+                    }
+
                     splitVal(val, widget2Location);
                     var spanAfterVal = widget2Location.find('span[data-after]').text();
                     spanAfterVal.length >= 2 && stocksSearch(spanAfterVal);
 
-                    
+
                     // // when正常输入
                     // initSearchSchool.currentTime = (new Date()).getTime();
                     // // NOTE: 持续快速输入时不触发搜索
@@ -240,16 +236,16 @@
             }, options);
 
             // 即popup效果
-            if (this.opts.appendTo === 'body') {
-                this.opts.popup = true;
-            }
+            // if (this.opts.appendTo === 'body') {
+            //     this.opts.popup = true;
+            // }
 
             // 自定义事件观察者
             this.handlers = {};
 
             // 初始化生成
             init(this);
-            this.init();
+            // this.init();
         };
     })();
 
@@ -258,39 +254,20 @@
     // 对外API
     // *********
     StocksBox.prototype = {
-        unbind: function(type) {
-            this.handlers[type] = [];
-            return this;
-        },
-        on: function(type, handler) {
-            if (typeof this.handlers[type] === 'undefined') {
-                this.handlers[type] = [];
-            }
-            this.handlers[type].push(handler);
-            return this;
-        },
-        fire: function(type, data) {
-            if (this.handlers[type] instanceof Array) {
-                var handlers = this.handlers[type];
-                for (var i = 0, len = handlers.length; i < len; i++) {
-                    handlers[i](data);
-                }
-            }
-        },
-        init: function() {
-            // popup时初始化隐藏
-            if (this.opts.popup) {
-                // $(this.opts.appendTo).find('.stocks-box-container').addClass('school-box-hide');
-            }
-        },
-        show: function() {
-            $(this.opts.appendTo).find('.stocks-box-container')
-                .removeClass('hide')
-        },
-        hide: function() {
-            $(this.opts.appendTo).find('.stocks-box-container')
-                .addClass('hide');
-        }
+        // init: function() {
+        //     // popup时初始化隐藏
+        //     if (this.opts.popup) {
+        //         // $(this.opts.appendTo).find('.stocks-box-container').addClass('school-box-hide');
+        //     }
+        // },
+        // show: function() {
+        //     $(this.opts.appendTo).find('.stocks-box-container')
+        //         .removeClass('hide')
+        // },
+        // hide: function() {
+        //     $(this.opts.appendTo).find('.stocks-box-container')
+        //         .addClass('hide');
+        // }
     };
 
     // export
