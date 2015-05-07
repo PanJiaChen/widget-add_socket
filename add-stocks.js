@@ -35,7 +35,7 @@
             var move2Top = tPos.top + tHeight;
             var move2Left = tPos.left;
             var widget2Location = $('.widget-to-location');
-        
+
             tVal = val.replace(/\n/g, "<br/>");
             splitVal(tVal, widget2Location);
 
@@ -48,7 +48,7 @@
 
             var lastSpan = widget2Location.find('span[data-flag]');
             var lastSpanPos = lastSpan.offset();
-            
+
             $('.stocks-box-container').css({
                 left: (lastSpanPos.left) + 'px',
                 top: (lastSpanPos.top - tHeight + 15) + 'px'
@@ -77,15 +77,6 @@
             }
         }
 
-        $(document).on('click', '.stocks-box-item', function(event) {
-            var val = $('.widget-focus').val();
-            var originalVal = $('.widget-to-location').find('[data-before]').html();
-            var addVal = $(this).text();
-            $('.widget-focus').val(originalVal + '$' + addVal + '$').focus();
-            $('.stocks-box-container').hide();
-            $('.widget-to-location').find('[data-flag]').attr('data-flag', 'false');
-        })
-
         var searchListScroll = function(isDown, $searchListContainer, $searchList) {
             var scrollTop = $searchListContainer.scrollTop();
             var viewMin = scrollTop;
@@ -97,13 +88,9 @@
 
             // deltaOffset要在视窗范围里
             if (deltaOffset > viewMax) {
-                $searchListContainer.animate({
-                    scrollTop: scrollTop + deltaOffset - viewMax
-                }, 'fast');
+                $searchListContainer.scrollTop(scrollTop + deltaOffset - viewMax)
             } else if (deltaOffset < viewMin) {
-                $searchListContainer.animate({
-                    scrollTop: scrollTop - (viewMin - deltaOffset)
-                }, 'fast');
+                $searchListContainer.scrollTop(scrollTop - (viewMin - deltaOffset)-30)
             }
         };
 
@@ -150,13 +137,42 @@
         var init = function(instance) {
             // 生成元素
             var $parent = $(instance.opts.appendTo);
-
             $parent.append($stocksBoxCopy.clone());
+
+            var timeClock; //计时器
+
             var widget2Location = $('.widget-to-location');
             var $searchListContainer = $parent.find('.stocks-box-container');
             var $searchList = $parent.find('.stocks-box-list');
             var $spanFlag = widget2Location.find('span[data-flag]');
-            $parent.on('keyup', '[widget-add-stocks]', function(event) {
+
+            //click事件
+            $(document).on('click', '.stocks-box-item', function(event) {
+                var val = $('.widget-focus').val();
+                var originalVal = widget2Location.find('[data-before]').html();
+                var addVal = $(this).text();
+                $('.widget-focus').val(originalVal + '$' + addVal + '$').focus();
+                $searchListContainer .hide();
+                $spanFlag.attr('data-flag', 'false');
+            })
+
+            //hover事件
+            $(document).on('mouseover mouseout', '.stocks-box-item', function() {
+                if (event.type == "mouseover") {
+                    $(this).addClass('active');
+                } else if (event.type == "mouseout") {
+                    $(this).removeClass('active');
+                }
+            })
+
+            $parent.on('keyup', '[widget-add-stocks]',function(){
+                console.log(timeClock)
+                clearInterval(timeClock);
+            });
+
+            //按键事件
+            $parent.on('keydown', '[widget-add-stocks]', function(event) {
+                //通过widget-focus类判断对象 
                 $('[widget-add-stocks]').removeClass('widget-focus');
                 $(this).addClass('widget-focus');
 
@@ -182,6 +198,7 @@
                     default:
                         break;
                 }
+
                 var val = $(this).val();
                 var lastVal = val.substr(-1);
                 var $self = $(this);
@@ -199,6 +216,7 @@
                     var spanAfterVal = widget2Location.find('span[data-after]').text();
                     spanAfterVal.length >= 2 && stocksSearch(spanAfterVal);
 
+                    
                     // // when正常输入
                     // initSearchSchool.currentTime = (new Date()).getTime();
                     // // NOTE: 持续快速输入时不触发搜索
