@@ -4,7 +4,7 @@
     var KEY_UP = 38;
     var KEY_DOWN = 40;
     var KEY_SPACE = 32;
-    // var KEY_PRESS_INTERVAL = 300; // 按键间隔（毫秒）用来触发搜索
+    var KEY_PRESS_INTERVAL = 200; // 按键间隔（毫秒）用来触发搜索
 
     var preventDefault = function(event) {
         if (event && event.preventDefault)
@@ -71,7 +71,7 @@
             $('.stocks-box-list').empty();
             for (var i = 0; i < data.length; i++) {
                 var codeGroup = data[i]['prod_code'].split('.');
-                if (codeGroup[1] == 'SS') {
+                if (codeGroup[1].toUpperCase() == 'SS') {
                     codeGroup[1] = 'SH'
                 }
                 $('.stocks-box-list').append('<li class="stocks-box-item">' + data[i]['prod_name'] + '(' + codeGroup[1] + codeGroup[0] + ')' + '</li>');
@@ -141,6 +141,7 @@
             $parent.append($stocksBoxCopy.clone());
 
             var timeClock; //计时器
+            // 记录上次搜索输入的timestamp
 
             var widget2Location = $('.widget-to-location');
             var $searchListContainer = $parent.find('.stocks-box-container');
@@ -172,6 +173,8 @@
                 //通过widget-focus类判断对象 
                 $('[widget-add-stocks]').removeClass('widget-focus');
                 $(this).addClass('widget-focus');
+
+                clearTimeout(timeClock);
 
                 var val = $(this).val();
                 var lastVal = val.substr(-1);
@@ -210,16 +213,11 @@
 
                     splitVal(val, widget2Location);
                     var spanAfterVal = widget2Location.find('span[data-after]').text();
-                    spanAfterVal.length >= 2 && stocksSearch(spanAfterVal);
 
-
-                    // // when正常输入
-                    // initSearchSchool.currentTime = (new Date()).getTime();
-                    // // NOTE: 持续快速输入时不触发搜索
-                    // if (initSearchSchool.currentTime - initSearchSchool.lastKeypressTime > KEY_PRESS_INTERVAL) {
-                    //     initSearchSchool.lastKeypressTime = initSearchSchool.currentTime;
-                    //     searchSchool(keywords, $searchListContainer, $searchList, $searchEmpty);
-                    // }
+                    // NOTE: 持续快速输入时不触发搜索
+                    timeClock = setTimeout(function() {
+                        spanAfterVal.length >= 2 && stocksSearch(spanAfterVal);
+                    }, 300)
                 }
 
             });
