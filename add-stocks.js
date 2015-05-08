@@ -17,7 +17,7 @@
     var StocksBox = (function() {
 
         var $stocksBoxCopy = $(
-            '<div class="stocks-box-container">' +
+            '<div class="widget-stocks-container">' +
             '<div class="stocks-box-title">请输入您要添加的股票代码</div>' +
             '<ul class="stocks-box-list"></ul>' +
             '</div>' +
@@ -49,32 +49,32 @@
             var lastSpan = widget2Location.find('span[data-flag]');
             var lastSpanPos = lastSpan.offset();
 
-            $('.stocks-box-container').css({
+            $('.widget-stocks-container').css({
                 left: (lastSpanPos.left) + 'px',
                 top: (lastSpanPos.top - tHeight + 15) + 'px'
             });
         }
 
-        var stocksSearch = function(searchVal) {
+        var stocksSearch = function(searchVal, $searchList) {
             var wizard = new HsDataFactoryList['wizard']({
                 prod_code: searchVal,
                 en_finance_mic: 'SS,SZ'
             });
             wizard.onDataReady(function(data) {
 
-                updateSearch(data)
+                updateSearch(data, $searchList)
 
             }).init()
         }
 
-        var updateSearch = function(data) {
-            $('.stocks-box-list').empty();
+        var updateSearch = function(data, $searchList) {
+            $searchList.empty();
             for (var i = 0; i < data.length; i++) {
                 var codeGroup = data[i]['prod_code'].split('.');
                 if (codeGroup[1].toUpperCase() == 'SS') {
                     codeGroup[1] = 'SH'
                 }
-                $('.stocks-box-list').append('<li class="stocks-box-item">' + data[i]['prod_name'] + '(' + codeGroup[1] + codeGroup[0] + ')' + '</li>');
+                $searchList.append('<li class="stocks-box-item">' + data[i]['prod_name'] + '(' + codeGroup[1] + codeGroup[0] + ')' + '</li>');
             }
         }
 
@@ -144,7 +144,7 @@
             // 记录上次搜索输入的timestamp
 
             var widget2Location = $('.widget-to-location');
-            var $searchListContainer = $parent.find('.stocks-box-container');
+            var $searchListContainer = $parent.find('.widget-stocks-container');
             var $searchList = $parent.find('.stocks-box-list');
             var $spanFlag = widget2Location.find('span[data-flag]');
 
@@ -180,6 +180,7 @@
                 var lastVal = val.substr(-1);
                 var $self = $(this);
                 if (lastVal === '$') {
+                    console.log('a')
                     fixPosition($self, val);
                     $searchListContainer.show();
                     $searchList.empty();
@@ -216,7 +217,7 @@
 
                     // NOTE: 持续快速输入时不触发搜索
                     timeClock = setTimeout(function() {
-                        spanAfterVal.length >= 2 && stocksSearch(spanAfterVal);
+                        spanAfterVal.length >= 2 && stocksSearch(spanAfterVal, $searchList);
                     }, 300)
                 }
 
@@ -255,15 +256,16 @@
         // init: function() {
         //     // popup时初始化隐藏
         //     if (this.opts.popup) {
-        //         // $(this.opts.appendTo).find('.stocks-box-container').addClass('school-box-hide');
+        //         // $(this.opts.appendTo).find('.widget-stocks-container').addClass('school-box-hide');
         //     }
         // },
-        // show: function() {
-        //     $(this.opts.appendTo).find('.stocks-box-container')
-        //         .removeClass('hide')
-        // },
+        show: function(self) {
+            var targetTextarea = self.closest('div').find('[widget-add-stocks]');
+            var val = targetTextarea.val();
+            targetTextarea.focus().val(val + '$').keyup();
+        },
         // hide: function() {
-        //     $(this.opts.appendTo).find('.stocks-box-container')
+        //     $(this.opts.appendTo).find('.widget-stocks-container')
         //         .addClass('hide');
         // }
     };

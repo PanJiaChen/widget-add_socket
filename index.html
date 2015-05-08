@@ -17,7 +17,7 @@
     body,html{
         font-size: 14px;
     }
-    .stocks-box-container {
+    .widget-stocks-container {
         position: absolute;
         z-index: 11001;
         background-color: #FFF;
@@ -40,8 +40,8 @@
     
     .widget-to-location {
         position: absolute;
-        /*opacity: 0;
-        z-index: -1000;*/
+        opacity: 0;
+        z-index: -1000;
     }
     
     .stocks-box-item {
@@ -95,8 +95,7 @@
 
         // bind event
         $('.add-stocks').click(function() {
-
-            stocksBox.show();
+            stocksBox.show($(this));
         });
 
     })();
