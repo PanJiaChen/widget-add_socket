@@ -1,9 +1,21 @@
-(function($) {
+(function(factory) {
+    if (typeof define === 'function' && define.amd) {
+        // AMD
+        define(['jquery', 'admin/js/hsData'], factory);
+    } else if (typeof exports === 'object') {
+        // CommonJS
+        factory(require('jquery'));
+    } else {
+        // Browser globals
+        factory(jQuery);
+    }
+}(function($, HsDataFactoryList) {
     // keycode
     var KEY_ENTER = 13;
     var KEY_UP = 38;
     var KEY_DOWN = 40;
     var KEY_SPACE = 32;
+    var KEY_CANCEL = 8;
     var KEY_PRESS_INTERVAL = 200; // 按键间隔（毫秒）用来触发搜索
 
     var preventDefault = function(event) {
@@ -28,10 +40,12 @@
             '</div>'
         );
 
-        var fixPosition = function($slef, val) {
-            var tWidth = $slef.outerWidth();
-            var tHeight = $slef.outerHeight();
-            var tPos = $slef.offset();
+        var fixPosition = function($self, val) {
+            var tWidth = $self.outerWidth();
+            var tHeight = $self.outerHeight();
+            var tPos = $self.offset();
+            var tpadTop = $self.css('padding-top');
+            var tpadLeft = $self.css('padding-left');
             var move2Top = tPos.top + tHeight;
             var move2Left = tPos.left;
             var widget2Location = $('.widget-to-location');
@@ -43,15 +57,17 @@
                 'width': tWidth,
                 'height': tHeight,
                 'top': move2Top,
-                'left': move2Left
+                'left': move2Left,
+                'padding-top': tpadTop,
+                'padding-left': tpadLeft
             });
 
             var lastSpan = widget2Location.find('span[data-flag]');
             var lastSpanPos = lastSpan.offset();
 
             $('.widget-stocks-container').css({
-                left: (lastSpanPos.left) + 'px',
-                top: (lastSpanPos.top - tHeight + 15) + 'px'
+                left: (lastSpanPos.left + 20) + 'px',
+                top: (lastSpanPos.top - tHeight + 30) + 'px'
             });
         }
 
@@ -91,7 +107,7 @@
             if (deltaOffset > viewMax) {
                 $searchListContainer.scrollTop(scrollTop + deltaOffset - viewMax)
             } else if (deltaOffset < viewMin) {
-                $searchListContainer.scrollTop(scrollTop - (viewMin - deltaOffset) - 30)
+                $searchListContainer.scrollTop(scrollTop - (viewMin - deltaOffset))
             }
         };
 
@@ -208,6 +224,11 @@
                             $spanFlag.attr('data-flag', 'false');
                             $searchList.empty();
                             break;
+                        case KEY_CANCEL:
+                            $searchListContainer.hide();
+                            $spanFlag.attr('data-flag', 'false');
+                            $searchList.empty();
+                            break;
                         default:
                             break;
                     }
@@ -273,4 +294,4 @@
     // export
     window.StocksBox = StocksBox;
 
-})(jQuery);
+}));
