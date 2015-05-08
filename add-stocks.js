@@ -1,15 +1,3 @@
-(function(factory) {
-    if (typeof define === 'function' && define.amd) {
-        // AMD
-        define(['jquery', 'admin/js/hsData'], factory);
-    } else if (typeof exports === 'object') {
-        // CommonJS
-        factory(require('jquery'));
-    } else {
-        // Browser globals
-        factory(jQuery);
-    }
-}(function($, HsDataFactoryList) {
     // keycode
     var KEY_ENTER = 13;
     var KEY_UP = 38;
@@ -294,4 +282,4 @@
     // export
     window.StocksBox = StocksBox;
 
-}));
+})(jQuery);
