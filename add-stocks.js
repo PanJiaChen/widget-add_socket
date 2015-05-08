@@ -1,3 +1,4 @@
+(function($) {
     // keycode
     var KEY_ENTER = 13;
     var KEY_UP = 38;
