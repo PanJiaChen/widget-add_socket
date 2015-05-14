@@ -1,4 +1,5 @@
 (function($) {
+
     // keycode
     var KEY_ENTER = 13;
     var KEY_UP = 38;
@@ -6,6 +7,9 @@
     var KEY_SPACE = 32;
     var KEY_CANCEL = 8;
     var KEY_PRESS_INTERVAL = 200; // 按键间隔（毫秒）用来触发搜索
+
+    //由于恒生暂时不支持中文
+    var valReg=/[^a-z0-9]+/gi;
 
     var preventDefault = function(event) {
         if (event && event.preventDefault)
@@ -19,7 +23,7 @@
 
         var $stocksBoxCopy = $(
             '<div class="widget-stocks-container">' +
-            '<div class="stocks-box-title">请输入您要添加的股票代码</div>' +
+            '<div class="stocks-box-title">请输入您要添加的股票代码/首字母</div>' +
             '<ul class="stocks-box-list"></ul>' +
             '</div>' +
             '<div class="widget-to-location">' +
@@ -61,8 +65,9 @@
         }
 
         var stocksSearch = function(searchVal, $searchList) {
+            var trueSearchVal=searchVal.replace(valReg,'');
             var wizard = new HsDataFactoryList['wizard']({
-                prod_code: searchVal,
+                prod_code: trueSearchVal,
                 en_finance_mic: 'SS,SZ'
             });
             wizard.onDataReady(function(data) {
@@ -152,6 +157,7 @@
             var $searchListContainer = $parent.find('.widget-stocks-container');
             var $searchList = $parent.find('.stocks-box-list');
             var $spanFlag = widget2Location.find('span[data-flag]');
+            var $spanAfter = widget2Location.find('span[data-after]');
 
             //click事件
             $(document).on('click', '.stocks-box-item', function(event) {
@@ -185,14 +191,13 @@
                 var lastVal = val.substr(-1);
                 var $self = $(this);
                 if (lastVal === '$') {
-                    console.log('a')
                     fixPosition($self, val);
                     $searchListContainer.show();
                     $searchList.empty();
                     splitVal(val, widget2Location);
                     $spanFlag.attr('data-flag', 'true');
                 }
-
+               
                 if ($spanFlag.attr('data-flag') == 'true') {
                     // 特殊按键（动作键）
                     switch (event.keyCode) {
@@ -213,17 +218,17 @@
                             $spanFlag.attr('data-flag', 'false');
                             $searchList.empty();
                             break;
-                        case KEY_CANCEL:
-                            $searchListContainer.hide();
-                            $spanFlag.attr('data-flag', 'false');
-                            $searchList.empty();
-                            break;
+                        // case KEY_CANCEL:
+                        //     $searchListContainer.hide();
+                        //     $spanFlag.attr('data-flag', 'false');
+                        //     $searchList.empty();
+                        //     break;
                         default:
                             break;
                     }
 
                     splitVal(val, widget2Location);
-                    var spanAfterVal = widget2Location.find('span[data-after]').text();
+                    var spanAfterVal =$spanAfter.text();
 
                     // NOTE: 持续快速输入时不触发搜索
                     timeClock = setTimeout(function() {
@@ -283,4 +288,4 @@
     // export
     window.StocksBox = StocksBox;
 
-})(jQuery);
+ })(jQuery);
