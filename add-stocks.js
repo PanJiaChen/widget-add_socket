@@ -9,7 +9,7 @@
     var KEY_PRESS_INTERVAL = 200; // 按键间隔（毫秒）用来触发搜索
 
     //由于恒生暂时不支持中文
-    var valReg=/[^a-z0-9]+/gi;
+    var valReg = /[^a-z0-9]+/gi;
 
     var preventDefault = function(event) {
         if (event && event.preventDefault)
@@ -65,7 +65,7 @@
         }
 
         var stocksSearch = function(searchVal, $searchList) {
-            var trueSearchVal=searchVal.replace(valReg,'');
+            var trueSearchVal = searchVal.replace(valReg, '');
             var wizard = new HsDataFactoryList['wizard']({
                 prod_code: trueSearchVal,
                 en_finance_mic: 'SS,SZ'
@@ -197,7 +197,7 @@
                     splitVal(val, widget2Location);
                     $spanFlag.attr('data-flag', 'true');
                 }
-               
+
                 if ($spanFlag.attr('data-flag') == 'true') {
                     // 特殊按键（动作键）
                     switch (event.keyCode) {
@@ -218,17 +218,17 @@
                             $spanFlag.attr('data-flag', 'false');
                             $searchList.empty();
                             break;
-                        // case KEY_CANCEL:
-                        //     $searchListContainer.hide();
-                        //     $spanFlag.attr('data-flag', 'false');
-                        //     $searchList.empty();
-                        //     break;
+                            // case KEY_CANCEL:
+                            //     $searchListContainer.hide();
+                            //     $spanFlag.attr('data-flag', 'false');
+                            //     $searchList.empty();
+                            //     break;
                         default:
                             break;
                     }
 
                     splitVal(val, widget2Location);
-                    var spanAfterVal =$spanAfter.text();
+                    var spanAfterVal = $spanAfter.text();
 
                     // NOTE: 持续快速输入时不触发搜索
                     timeClock = setTimeout(function() {
@@ -288,4 +288,4 @@
     // export
     window.StocksBox = StocksBox;
 
- })(jQuery);
+})(jQuery);
