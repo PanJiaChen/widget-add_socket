@@ -7,6 +7,7 @@
     var KEY_SPACE = 32;
     var KEY_CANCEL = 8;
     var KEY_PRESS_INTERVAL = 200; // 按键间隔（毫秒）用来触发搜索
+    var KEY_DOLLAR=36; //$ keycode
 
     //由于恒生暂时不支持中文
     var valReg = /[^a-z0-9]+/gi;
@@ -28,7 +29,8 @@
             '</div>' +
             '<div class="widget-to-location">' +
             '<span data-before></span>' +
-            '<span data-flag>$</span>' +
+            '<span data-flag></span>' +
+            '<span data-search>$</span>' +
             '<span data-after></span>' +
             '</div>'
         );
@@ -65,6 +67,7 @@
         }
 
         var stocksSearch = function(searchVal, $searchList) {
+            console.log('apple')
             var trueSearchVal = searchVal.replace(valReg, '');
             var wizard = new HsDataFactoryList['wizard']({
                 prod_code: trueSearchVal,
@@ -144,6 +147,106 @@
             target.find('span[data-after]').html(strAfter);
         }
 
+        var splitTagVal = function(val,cur, target) {
+            var curPos=cursorPosition.get(cur).end;
+            var strBefore = val.substr(0, curPos)+('$');
+            var strAfter=val.substr(curPos);
+            target.find('span[data-flag]').html(curPos)
+            target.find('span[data-before]').html(strBefore)
+            target.find('span[data-after]').html(strAfter);
+        }
+
+        var calSearchStr=function(val,cur,target){
+            var start=target.find('span[data-flag]').html();
+            var end=cursorPosition.get(cur).end;
+            var searchStr = val.substr(+start+1, +end);
+            return searchStr
+        }
+        var cursorPosition = {
+            get: function (textarea) {
+                var rangeData = {text: "", start: 0, end: 0 };
+            
+                if (textarea.setSelectionRange) { // W3C    
+                    textarea.focus();
+                    rangeData.start= textarea.selectionStart;
+                    rangeData.end = textarea.selectionEnd;
+                    rangeData.text = (rangeData.start != rangeData.end) ? textarea.value.substring(rangeData.start, rangeData.end): "";
+                } else if (document.selection) { // IE
+                    textarea.focus();
+                    var i,
+                        oS = document.selection.createRange(),
+                        // Don't: oR = textarea.createTextRange()
+                        oR = document.body.createTextRange();
+                    oR.moveToElementText(textarea);
+                    
+                    rangeData.text = oS.text;
+                    rangeData.bookmark = oS.getBookmark();
+                    
+                    // object.moveStart(sUnit [, iCount]) 
+                    // Return Value: Integer that returns the number of units moved.
+                    for (i = 0; oR.compareEndPoints('StartToStart', oS) < 0 && oS.moveStart("character", -1) !== 0; i ++) {
+                        // Why? You can alert(textarea.value.length)
+                        if (textarea.value.charAt(i) == '\r' ) {
+                            i ++;
+                        }
+                    }
+                    rangeData.start = i;
+                    rangeData.end = rangeData.text.length + rangeData.start;
+                }
+                return rangeData;
+            },
+            
+            set: function (textarea, rangeData) {
+                var oR, start, end;
+                if(!rangeData) {
+                    alert("You must get cursor position first.")
+                }
+                textarea.focus();
+                if (textarea.setSelectionRange) { // W3C
+                    textarea.setSelectionRange(rangeData.start, rangeData.end);
+                } else if (textarea.createTextRange) { // IE
+                    oR = textarea.createTextRange();
+                    
+                    // Fixbug : ues moveToBookmark()
+                    // In IE, if cursor position at the end of textarea, the set function don't work
+                    if(textarea.value.length === rangeData.start) {
+                        //alert('hello')
+                        oR.collapse(false);
+                        oR.select();
+                    } else {
+                        oR.moveToBookmark(rangeData.bookmark);
+                        oR.select();
+                    }
+                }
+            },
+
+            add: function (textarea, rangeData, text) {
+                var oValue, nValue, oR, sR, nStart, nEnd, st;
+                this.set(textarea, rangeData);
+                
+                if (textarea.setSelectionRange) { // W3C
+                    oValue = textarea.value;
+                    nValue = oValue.substring(0, rangeData.start) + text + oValue.substring(rangeData.end);
+                    nStart = nEnd = rangeData.start + text.length;
+                    st = textarea.scrollTop;
+                    textarea.value = nValue;
+                    // Fixbug:
+                    // After textarea.values = nValue, scrollTop value to 0
+                    if(textarea.scrollTop != st) {
+                        textarea.scrollTop = st;
+                    }
+                    textarea.setSelectionRange(nStart, nEnd);
+                } else if (textarea.createTextRange) { // IE
+                    sR = document.selection.createRange();
+                    sR.text = text;
+                    sR.setEndPoint('StartToEnd', sR);
+                    sR.select();
+                }
+            }
+        }
+
+
+
 
         var init = function(instance) {
             // 生成元素
@@ -152,6 +255,8 @@
 
             var timeClock; //计时器
             // 记录上次搜索输入的timestamp
+            // 
+            var pressPool='';
 
             var widget2Location = $('.widget-to-location');
             var $searchListContainer = $parent.find('.widget-stocks-container');
@@ -164,7 +269,9 @@
                 var val = $('.widget-focus').val();
                 var originalVal = widget2Location.find('[data-before]').html();
                 var addVal = $(this).text();
-                $('.widget-focus').val(originalVal + '$' + addVal + '$ ').focus();
+                console.log('originalVal'+originalVal)
+                console.log('addVal'+addVal)
+                $('.widget-focus').val(originalVal + addVal + '$ ').focus();
                 $searchListContainer.hide();
                 $spanFlag.attr('data-flag', 'false');
             })
@@ -180,7 +287,7 @@
 
 
             //按键事件
-            $parent.on('keyup', '[widget-add-stocks]', function(event) {
+            $parent.on('keypress', '[widget-add-stocks]', function(event) {
                 //通过widget-focus类判断对象 
                 $('[widget-add-stocks]').removeClass('widget-focus');
                 $(this).addClass('widget-focus');
@@ -188,18 +295,40 @@
                 clearTimeout(timeClock);
 
                 var val = $(this).val();
+                
+                var pressKeyCode=event.which || event.keyCode;
                 var lastVal = val.substr(-1);
                 var $self = $(this);
-                if (lastVal === '$') {
+
+                if ($spanFlag.attr('data-flag') == 'true') {
+                    
+                }
+
+                if (pressKeyCode == KEY_DOLLAR ) {
                     fixPosition($self, val);
                     $searchListContainer.show();
                     $searchList.empty();
-                    splitVal(val, widget2Location);
+                    // splitVal(val, widget2Location);
+                    splitTagVal(val,$(this)[0],widget2Location);
                     $spanFlag.attr('data-flag', 'true');
+                    pressPool=''
                 }
 
-                if ($spanFlag.attr('data-flag') == 'true') {
-                    // 特殊按键（动作键）
+            });
+
+            $parent.on('keyup','[widget-add-stocks]',function(event){
+                if($spanFlag.attr('data-flag') == 'true'){
+
+                    var val = $(this).val();
+                    var searchStr=calSearchStr(val,$(this)[0],widget2Location);
+                    // widget2Location.find('span[data-search]').html(pressPool);
+                    // NOTE: 持续快速输入时不触发搜索
+                    console.log(searchStr)
+                    timeClock = setTimeout(function() {
+                        searchStr.length >= 2 && stocksSearch(searchStr, $searchList);
+                    }, 300)
+
+                     // 特殊按键（动作键）
                     switch (event.keyCode) {
                         case KEY_ENTER:
                             searchSchoolChosen($searchList);
@@ -210,6 +339,7 @@
                             return preventDefault(event);
                             break;
                         case KEY_DOWN:
+                            console.log('down')
                             searchListScrollNext($searchListContainer, $searchList);
                             return preventDefault(event);
                             break;
@@ -227,16 +357,8 @@
                             break;
                     }
 
-                    splitVal(val, widget2Location);
-                    var spanAfterVal = $spanAfter.text();
-
-                    // NOTE: 持续快速输入时不触发搜索
-                    timeClock = setTimeout(function() {
-                        spanAfterVal.length >= 2 && stocksSearch(spanAfterVal, $searchList);
-                    }, 300)
                 }
-
-            });
+            })
 
         };
 
