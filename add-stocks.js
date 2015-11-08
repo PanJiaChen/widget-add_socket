@@ -35,7 +35,7 @@
             '</div>'
         );
 
-        var fixPosition = function($self, val) {
+        var fixPosition = function(val,$self,widget2Location) {
             var tWidth = $self.outerWidth();
             var tHeight = $self.outerHeight();
             var tPos = $self.offset();
@@ -43,10 +43,9 @@
             var tpadLeft = $self.css('padding-left');
             var move2Top = tPos.top + tHeight;
             var move2Left = tPos.left;
-            var widget2Location = $('.widget-to-location');
-
             tVal = val.replace(/\n/g, "<br/>");
-            splitVal(tVal, widget2Location);
+            console.log(tVal)
+            splitTagVal(tVal,$self,widget2Location);
 
             widget2Location.css({
                 'width': tWidth,
@@ -67,7 +66,6 @@
         }
 
         var stocksSearch = function(searchVal, $searchList) {
-            console.log('apple')
             var trueSearchVal = searchVal.replace(valReg, '');
             var wizard = new HsDataFactoryList['wizard']({
                 prod_code: trueSearchVal,
@@ -131,6 +129,7 @@
             } else {
                 $searchList.children('li').eq($cur.index() + 1).addClass('active');
                 searchListScroll(true, $searchListContainer, $searchList);
+                console.log('not first')
             }
         };
 
@@ -138,14 +137,6 @@
             // 转向click event
             $searchList.children('li.active').click();
         };
-
-        var splitVal = function(val, target) {
-            var valArr = val.split('$');
-            var strBefore = valArr.slice(0, valArr.length - 1).join('$');
-            var strAfter = valArr.slice(-1);
-            target.find('span[data-before]').html(strBefore)
-            target.find('span[data-after]').html(strAfter);
-        }
 
         var splitTagVal = function(val,cur, target) {
             var curPos=cursorPosition.get(cur).end;
@@ -159,7 +150,7 @@
         var calSearchStr=function(val,cur,target){
             var start=target.find('span[data-flag]').html();
             var end=cursorPosition.get(cur).end;
-            var searchStr = val.substr(+start+1, +end);
+            var searchStr = val.substring(+start+1, +end);
             return searchStr
         }
         var cursorPosition = {
@@ -195,58 +186,7 @@
                 }
                 return rangeData;
             },
-            
-            set: function (textarea, rangeData) {
-                var oR, start, end;
-                if(!rangeData) {
-                    alert("You must get cursor position first.")
-                }
-                textarea.focus();
-                if (textarea.setSelectionRange) { // W3C
-                    textarea.setSelectionRange(rangeData.start, rangeData.end);
-                } else if (textarea.createTextRange) { // IE
-                    oR = textarea.createTextRange();
-                    
-                    // Fixbug : ues moveToBookmark()
-                    // In IE, if cursor position at the end of textarea, the set function don't work
-                    if(textarea.value.length === rangeData.start) {
-                        //alert('hello')
-                        oR.collapse(false);
-                        oR.select();
-                    } else {
-                        oR.moveToBookmark(rangeData.bookmark);
-                        oR.select();
-                    }
-                }
-            },
-
-            add: function (textarea, rangeData, text) {
-                var oValue, nValue, oR, sR, nStart, nEnd, st;
-                this.set(textarea, rangeData);
-                
-                if (textarea.setSelectionRange) { // W3C
-                    oValue = textarea.value;
-                    nValue = oValue.substring(0, rangeData.start) + text + oValue.substring(rangeData.end);
-                    nStart = nEnd = rangeData.start + text.length;
-                    st = textarea.scrollTop;
-                    textarea.value = nValue;
-                    // Fixbug:
-                    // After textarea.values = nValue, scrollTop value to 0
-                    if(textarea.scrollTop != st) {
-                        textarea.scrollTop = st;
-                    }
-                    textarea.setSelectionRange(nStart, nEnd);
-                } else if (textarea.createTextRange) { // IE
-                    sR = document.selection.createRange();
-                    sR.text = text;
-                    sR.setEndPoint('StartToEnd', sR);
-                    sR.select();
-                }
-            }
         }
-
-
-
 
         var init = function(instance) {
             // 生成元素
@@ -255,8 +195,6 @@
 
             var timeClock; //计时器
             // 记录上次搜索输入的timestamp
-            // 
-            var pressPool='';
 
             var widget2Location = $('.widget-to-location');
             var $searchListContainer = $parent.find('.widget-stocks-container');
@@ -269,8 +207,6 @@
                 var val = $('.widget-focus').val();
                 var originalVal = widget2Location.find('[data-before]').html();
                 var addVal = $(this).text();
-                console.log('originalVal'+originalVal)
-                console.log('addVal'+addVal)
                 $('.widget-focus').val(originalVal + addVal + '$ ').focus();
                 $searchListContainer.hide();
                 $spanFlag.attr('data-flag', 'false');
@@ -297,36 +233,22 @@
                 var val = $(this).val();
                 
                 var pressKeyCode=event.which || event.keyCode;
-                var lastVal = val.substr(-1);
                 var $self = $(this);
 
-                if ($spanFlag.attr('data-flag') == 'true') {
-                    
-                }
-
                 if (pressKeyCode == KEY_DOLLAR ) {
-                    fixPosition($self, val);
+                    fixPosition(val,$self,widget2Location);
                     $searchListContainer.show();
                     $searchList.empty();
-                    // splitVal(val, widget2Location);
-                    splitTagVal(val,$(this)[0],widget2Location);
+                    splitTagVal(val,$self[0],widget2Location);
                     $spanFlag.attr('data-flag', 'true');
-                    pressPool=''
                 }
 
             });
 
             $parent.on('keyup','[widget-add-stocks]',function(event){
                 if($spanFlag.attr('data-flag') == 'true'){
-
                     var val = $(this).val();
                     var searchStr=calSearchStr(val,$(this)[0],widget2Location);
-                    // widget2Location.find('span[data-search]').html(pressPool);
-                    // NOTE: 持续快速输入时不触发搜索
-                    console.log(searchStr)
-                    timeClock = setTimeout(function() {
-                        searchStr.length >= 2 && stocksSearch(searchStr, $searchList);
-                    }, 300)
 
                      // 特殊按键（动作键）
                     switch (event.keyCode) {
@@ -354,6 +276,11 @@
                             //     $searchList.empty();
                             //     break;
                         default:
+                             // NOTE: 持续快速输入时不触发搜索
+                            timeClock = setTimeout(function() {
+                                 console.log(searchStr)
+                                searchStr.length >= 2 && stocksSearch(searchStr, $searchList);
+                            }, 300)
                             break;
                     }
 
