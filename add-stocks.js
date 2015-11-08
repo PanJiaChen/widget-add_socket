@@ -41,28 +41,36 @@
             var tPos = $self.offset();
             var tpadTop = $self.css('padding-top');
             var tpadLeft = $self.css('padding-left');
+            var tLineHeight = $self.css('line-height');
             var move2Top = tPos.top + tHeight;
             var move2Left = tPos.left;
-            tVal = val.replace(/\n/g, "<br/>");
-            console.log(tVal)
-            splitTagVal(tVal,$self,widget2Location);
+            
+            // splitTagVal(val,$self,widget2Location);
+            
+            tansformBr(widget2Location)
 
             widget2Location.css({
                 'width': tWidth,
                 'height': tHeight,
                 'top': move2Top,
                 'left': move2Left,
+                'line-height':tLineHeight,
                 'padding-top': tpadTop,
                 'padding-left': tpadLeft
             });
 
             var lastSpan = widget2Location.find('span[data-flag]');
             var lastSpanPos = lastSpan.offset();
-
             $('.widget-stocks-container').css({
                 left: (lastSpanPos.left + 20) + 'px',
                 top: (lastSpanPos.top - tHeight + 30) + 'px'
             });
+        }
+
+        var tansformBr=function(target){
+            var val=target.find('span[data-before]').html();
+            tVal=val.replace(/\n/g, "<br />");
+            target.find('span[data-before]').html(tVal)
         }
 
         var stocksSearch = function(searchVal, $searchList) {
@@ -129,7 +137,6 @@
             } else {
                 $searchList.children('li').eq($cur.index() + 1).addClass('active');
                 searchListScroll(true, $searchListContainer, $searchList);
-                console.log('not first')
             }
         };
 
@@ -205,9 +212,10 @@
             //click事件
             $(document).on('click', '.stocks-box-item', function(event) {
                 var val = $('.widget-focus').val();
-                var originalVal = widget2Location.find('[data-before]').html();
+                var originalBeforeVal = widget2Location.find('[data-before]').html().replace(/<br>/g,"\r\n");
+                var originalAfterVal = widget2Location.find('[data-after]').html();
                 var addVal = $(this).text();
-                $('.widget-focus').val(originalVal + addVal + '$ ').focus();
+                $('.widget-focus').val(originalBeforeVal + addVal + '$ '+originalAfterVal).focus();
                 $searchListContainer.hide();
                 $spanFlag.attr('data-flag', 'false');
             })
@@ -236,10 +244,10 @@
                 var $self = $(this);
 
                 if (pressKeyCode == KEY_DOLLAR ) {
-                    fixPosition(val,$self,widget2Location);
                     $searchListContainer.show();
                     $searchList.empty();
                     splitTagVal(val,$self[0],widget2Location);
+                    fixPosition(val,$self,widget2Location);
                     $spanFlag.attr('data-flag', 'true');
                 }
 
@@ -261,7 +269,6 @@
                             return preventDefault(event);
                             break;
                         case KEY_DOWN:
-                            console.log('down')
                             searchListScrollNext($searchListContainer, $searchList);
                             return preventDefault(event);
                             break;
@@ -278,7 +285,6 @@
                         default:
                              // NOTE: 持续快速输入时不触发搜索
                             timeClock = setTimeout(function() {
-                                 console.log(searchStr)
                                 searchStr.length >= 2 && stocksSearch(searchStr, $searchList);
                             }, 300)
                             break;
